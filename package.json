@@ -1,0 +1,42 @@
+{
+  "name": "kelajs",
+  "version": "1.0.0",
+  "description": "Simple in memory DB with live updates",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "tslint -p tsconfig.json",
+    "test": "jest --config jestconfig.json",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
+    "preversion": "npm run lint",
+    "version": "git add .",
+    "postversion": "git push && git push --tags"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AleksanderMisztal/kelajs.git"
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "keywords": [
+    "database",
+    "inmemory",
+    "live"
+  ],
+  "author": "Aleksander Misztal",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AleksanderMisztal/kelajs/issues"
+  },
+  "homepage": "https://github.com/AleksanderMisztal/kelajs#readme",
+  "devDependencies": {
+    "@types/jest": "^26.0.22",
+    "jest": "^26.6.3",
+    "ts-jest": "^26.5.4",
+    "tslint": "^6.1.3",
+    "typescript": "^4.2.3"
+  }
+}
