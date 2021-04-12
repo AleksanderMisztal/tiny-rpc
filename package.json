@@ -1,5 +1,5 @@
 {
-  "name": "tiny-rpc",
+  "name": "@vmisztvl/tiny-rpc",
   "version": "0.1.0",
   "description": "Simple rpc with topics",
   "main": "dist/index.js",
@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "lint": "tslint -p tsconfig.json",
+    "lint": "tslint -c tslint.json 'src/**/*.ts'",
     "test": "jest --config jestconfig.json",
     "prepare": "tsc"
   },

@@ -5,33 +5,26 @@ export class RpcClient {
   private callbacks: { [uid: string]: Action<SResponse<any>> } = {};
   private handlers: { [topic: string]: Action<any> } = {};
 
-  constructor(path: string) {
+  constructor(
+    path: string,
+    onConnected?: Action<void>,
+    onDisconnected?: Action<void>
+  ) {
     const socket = new WebSocket(`ws://${window.location.host}${path}`);
     this.socket = socket;
 
-    socket.onopen = (_e) => {
-      console.log('Ws connection opened');
-    };
+    socket.onopen = () => onConnected && onConnected();
 
     socket.onmessage = (m) => this.handleMessage(JSON.parse(m.data));
 
-    socket.onclose = (e) => {
-      if (e.wasClean) {
-        console.log('Socket closed cleanly');
-        console.log(e.code);
-        console.log(e.reason);
-      } else {
-        console.log('Socket conection died');
-        console.log(e.code);
-      }
-    };
+    socket.onclose = (e) => onDisconnected && onDisconnected();
   }
 
   private handleMessage<T>(message: SMessage<T>): void {
     if (message.type === 'topic') {
       const { topic, content } = message.data;
       this.handlers[topic](content);
-    } else if (message.type == 'response') {
+    } else if (message.type === 'response') {
       const { transactionUid, response } = message.data;
       this.callbacks[transactionUid](response);
     }

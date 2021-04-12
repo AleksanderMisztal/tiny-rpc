@@ -10,11 +10,9 @@ export class RpcSocket {
     // binds this
     socket.onmessage = (message) =>
       this.handleMessage(JSON.parse(message.data.toString()));
-    console.log('New client connected', { handlers });
   }
 
   handleMessage<T>(message: CRequest<T>): void {
-    console.log('handlers: ', this.handlers);
     const { transactionUid, topic, args } = message;
     if (!this.handlers[topic]) {
       return this.respond(transactionUid, {
