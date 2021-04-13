@@ -1,8 +1,8 @@
 import ws from 'ws';
 
 export class RpcSocket {
-  socket: ws;
-  handlers: IMap<Action<any>> = {};
+  private socket: ws;
+  private handlers: IMap<Action<any>> = {};
 
   constructor(socket: ws, handlers: IMap<Action<any>>) {
     this.socket = socket;
@@ -12,7 +12,11 @@ export class RpcSocket {
       this.handleMessage(JSON.parse(message.data.toString()));
   }
 
-  handleMessage<T>(message: CRequest<T>): void {
+  public post<T>(data: STopic<T>): void {
+    this.sendMessage({ type: 'topic', data });
+  }
+
+  private handleMessage<T>(message: CRequest<T>): void {
     const { transactionUid, topic, args } = message;
     if (!this.handlers[topic]) {
       return this.respond(transactionUid, {
@@ -24,15 +28,11 @@ export class RpcSocket {
     this.respond(transactionUid, { status: 'success', content });
   }
 
-  post<T>(data: STopic<T>): void {
-    this.sendMessage({ type: 'topic', data });
-  }
-
-  respond<T>(transactionUid: string, response: SResponse<T>) {
+  private respond<T>(transactionUid: string, response: SResponse<T>) {
     this.sendMessage({ type: 'response', data: { transactionUid, response } });
   }
 
-  sendMessage<T>(message: SMessage<T>): void {
+  private sendMessage<T>(message: SMessage<T>): void {
     this.socket.send(JSON.stringify(message));
   }
 }

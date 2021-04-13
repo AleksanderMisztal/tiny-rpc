@@ -6,7 +6,7 @@ import { RpcSocket } from './rpcSocket';
 export class RpcServer {
   private clients: IMap<RpcSocket> = {};
   private handlers: IMap<Action<any>> = {};
-  onNewClient: Action<RpcSocket> | undefined;
+  public onNewClient: Action<RpcSocket> | undefined;
 
   constructor(server: Server, path: string) {
     const wsServer = new ws.Server({ server, path });
@@ -14,14 +14,14 @@ export class RpcServer {
     wsServer.on('connection', (socket) => this.handleWsConnection(socket));
   }
 
-  handleWsConnection(socket: ws) {
+  private handleWsConnection(socket: ws) {
     const uid = uuid();
     const client = new RpcSocket(socket, this.handlers);
     this.clients[uid] = client;
     if (this.onNewClient) this.onNewClient(this.clients[uid]);
   }
 
-  registerHandler<T>(topic: string, handler: Action<T>): void {
+  public registerHandler<T>(topic: string, handler: Action<T>): void {
     this.handlers[topic] = handler;
   }
 }

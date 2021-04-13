@@ -11,9 +11,8 @@ const rpc = new RpcServer(server, '/rpc');
 
 rpc.registerHandler('getTime', () => Date.now());
 
-rpc.onNewClient = (client) => {
+rpc.onNewClient = (client) =>
   client.post({ topic: 'messages', content: 'Hello client!' });
-};
 ```
 
 ### Client
@@ -27,7 +26,7 @@ rpc.registerHandler('messages', addMessage);
 
 button.onclick = async () => {
   const data = await rpc.call('getTime');
-  number.innerHTML = data.toString();
+  console.log(data);
 };
 ```
 

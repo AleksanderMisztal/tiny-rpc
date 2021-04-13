@@ -20,25 +20,11 @@ export class RpcClient {
     socket.onclose = (e) => onDisconnected && onDisconnected();
   }
 
-  private handleMessage<T>(message: SMessage<T>): void {
-    if (message.type === 'topic') {
-      const { topic, content } = message.data;
-      this.handlers[topic](content);
-    } else if (message.type === 'response') {
-      const { transactionUid, response } = message.data;
-      this.callbacks[transactionUid](response);
-    }
-  }
-
-  registerHandler<T>(topic: string, handler: Action<T>): void {
+  public registerHandler<T>(topic: string, handler: Action<T>): void {
     this.handlers[topic] = handler;
   }
 
-  private send<T>(data: CRequest<T>): void {
-    this.socket.send(JSON.stringify(data));
-  }
-
-  call<TArg, TRet>(topic: string, args?: TArg): Promise<TRet> {
+  public call<TArg, TRet>(topic: string, args?: TArg): Promise<TRet> {
     const transactionUid = uuid();
     this.send({ topic, transactionUid, args });
     const callback = (resolve: Action<TRet>, reject: Action<string>) => {
@@ -49,5 +35,19 @@ export class RpcClient {
     };
     const result = new Promise<TRet>(callback);
     return result;
+  }
+
+  private handleMessage<T>(message: SMessage<T>): void {
+    if (message.type === 'topic') {
+      const { topic, content } = message.data;
+      this.handlers[topic](content);
+    } else if (message.type === 'response') {
+      const { transactionUid, response } = message.data;
+      this.callbacks[transactionUid](response);
+    }
+  }
+
+  private send<T>(data: CRequest<T>): void {
+    this.socket.send(JSON.stringify(data));
   }
 }
