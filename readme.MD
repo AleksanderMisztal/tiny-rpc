@@ -2,6 +2,8 @@
 
 A node package that allows rpc over websockets and pushing messages from server to client with as few lines of code as possible. Written in typescript.
 
+**Warning: the following examples are for versions 0.1.x, which have been deprecated**
+
 ### Server
 
 ```javascript
@@ -11,8 +13,7 @@ const rpc = new RpcServer(server, '/rpc');
 
 rpc.registerHandler('getTime', () => Date.now());
 
-rpc.onNewClient = (client) =>
-  client.post({ topic: 'messages', content: 'Hello client!' });
+rpc.onNewClient = (client) => client.post({ topic: 'messages', content: 'Hello client!' });
 ```
 
 ### Client

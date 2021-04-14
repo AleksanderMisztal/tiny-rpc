@@ -2,18 +2,17 @@ import ws from 'ws';
 
 export class RpcSocket {
   private socket: ws;
-  private handlers: IMap<Action<any>> = {};
+  private handlers: IMap<Action2<RpcSocket, any>> = {};
 
-  constructor(socket: ws, handlers: IMap<Action<any>>) {
+  constructor(socket: ws, handlers: IMap<Action2<RpcSocket, any>>) {
     this.socket = socket;
     this.handlers = handlers;
     // binds this
-    socket.onmessage = (message) =>
-      this.handleMessage(JSON.parse(message.data.toString()));
+    socket.onmessage = (message) => this.handleMessage(JSON.parse(message.data.toString()));
   }
 
-  public post<T>(data: STopic<T>): void {
-    this.sendMessage({ type: 'topic', data });
+  public post<T>(topic: string, content: T): void {
+    this.sendMessage({ type: 'topic', data: { topic, content } });
   }
 
   private handleMessage<T>(message: CRequest<T>): void {
@@ -21,10 +20,10 @@ export class RpcSocket {
     if (!this.handlers[topic]) {
       return this.respond(transactionUid, {
         status: 'error',
-        reason: 'handler does not exist',
+        reason: 'handler does not exist on server',
       });
     }
-    const content = this.handlers[topic](args);
+    const content = this.handlers[topic](this, args);
     this.respond(transactionUid, { status: 'success', content });
   }
 

@@ -5,11 +5,7 @@ export class RpcClient {
   private callbacks: { [uid: string]: Action<SResponse<any>> } = {};
   private handlers: { [topic: string]: Action<any> } = {};
 
-  constructor(
-    path: string,
-    onConnected?: Action<void>,
-    onDisconnected?: Action<void>
-  ) {
+  constructor(path: string, onConnected?: Action<void>, onDisconnected?: Action<void>) {
     const socket = new WebSocket(`ws://${window.location.host}${path}`);
     this.socket = socket;
 
@@ -17,11 +13,11 @@ export class RpcClient {
 
     socket.onmessage = (m) => this.handleMessage(JSON.parse(m.data));
 
-    socket.onclose = (e) => onDisconnected && onDisconnected();
+    socket.onclose = (_e) => onDisconnected && onDisconnected();
   }
 
-  public registerHandler<T>(topic: string, handler: Action<T>): void {
-    this.handlers[topic] = handler;
+  public subscribe<T>(topic: string, onMessage: Action<T>): void {
+    this.handlers[topic] = onMessage;
   }
 
   public call<TArg, TRet>(topic: string, args?: TArg): Promise<TRet> {
@@ -29,7 +25,7 @@ export class RpcClient {
     this.send({ topic, transactionUid, args });
     const callback = (resolve: Action<TRet>, reject: Action<string>) => {
       this.callbacks[transactionUid] = (response: SResponse<TRet>) => {
-        if (response.status === 'error') reject(response.reason);
+        if (response.status === 'error') reject('Rpc error: ' + response.reason);
         else resolve(response.content);
       };
     };
