@@ -1,8 +1,14 @@
 # tiny-rpc
 
-A node package that allows rpc over websockets and pushing messages from server to client with as few lines of code as possible. Written in typescript.
+A node package that allows rpc over websockets and pushing messages from server to client.
 
-**Warning: the following examples are for versions 0.1.x, which have been deprecated**
+- Focused on simplicity.
+- Promise api.
+- Written in typescript.
+
+[Package repo](https://github.com/AleksanderMisztal/tiny-rpc)
+
+[Full example](https://github.com/AleksanderMisztal/tiny-rpc-examples)
 
 ### Server
 
@@ -13,7 +19,7 @@ const rpc = new RpcServer(server, '/rpc');
 
 rpc.registerHandler('getTime', () => Date.now());
 
-rpc.onNewClient = (client) => client.post({ topic: 'messages', content: 'Hello client!' });
+rpc.onNewClient = (client) => client.post('messages', 'Hello client!');
 ```
 
 ### Client
@@ -23,7 +29,7 @@ import { RpcClient } from '@vmisztvl/tiny-rpc';
 
 const rpc = new RpcClient('/rpc');
 
-rpc.registerHandler('messages', addMessage);
+rpc.subscribe('messages', addMessage);
 
 button.onclick = async () => {
   const data = await rpc.call('getTime');
@@ -31,4 +37,4 @@ button.onclick = async () => {
 };
 ```
 
-Full example repo available [here](https://github.com/AleksanderMisztal/tiny-rpc-examples).
+_Please do submit feature requests / bugs / questions / suggestions._
