@@ -4,16 +4,26 @@ export class RpcClient {
   private socket: WebSocket;
   private callbacks: { [uid: string]: Action<SResponse<any>> } = {};
   private handlers: { [topic: string]: Action<any> } = {};
+  private connection: Promise<void>;
 
   constructor(path: string, onConnected?: Action<void>, onDisconnected?: Action<void>) {
+    let resolve: Action<void>;
+    this.connection = new Promise((res) => (resolve = res));
     const socket = new WebSocket(`ws://${window.location.host}${path}`);
     this.socket = socket;
 
-    socket.onopen = () => onConnected && onConnected();
+    socket.onopen = () => {
+      resolve();
+      if (onConnected) onConnected();
+    };
 
     socket.onmessage = (m) => this.handleMessage(JSON.parse(m.data));
 
     socket.onclose = (_e) => onDisconnected && onDisconnected();
+  }
+
+  public async connect() {
+    await this.connection;
   }
 
   public subscribe<T>(topic: string, onMessage: Action<T>): void {

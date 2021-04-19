@@ -8,7 +8,7 @@ interface IMap<T> {
 interface CRequest<T> {
   transactionUid: string;
   topic: string;
-  args?: T;
+  args: T;
 }
 
 type STopic<T> = { topic: string; content: T };

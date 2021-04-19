@@ -1,10 +1,11 @@
 import ws from 'ws';
+import { Request } from './request';
 
 export class RpcSocket {
   private socket: ws;
-  private handlers: IMap<(s: RpcSocket, args: any) => any> = {};
+  private handlers: IMap<(req: Request<any, any>) => void> = {};
 
-  constructor(socket: ws, handlers: IMap<(s: RpcSocket, args: any) => any>) {
+  constructor(socket: ws, handlers: IMap<(req: Request<any, any>) => void>) {
     this.socket = socket;
     this.handlers = handlers;
     socket.onmessage = (m) => this.handleMessage(JSON.parse(m.data.toString()));
@@ -14,21 +15,32 @@ export class RpcSocket {
     this.sendMessage({ type: 'topic', data: { topic, content } });
   }
 
-  private handleMessage<T>(message: CRequest<T>): void {
+  private handleMessage<TArg, TRet>(message: CRequest<TArg>): void {
     const { transactionUid, topic, args } = message;
     if (!this.handlers[topic]) {
-      this.respond(transactionUid, {
-        status: 'error',
-        reason: 'handler does not exist on server',
-      });
-      return;
+      return this.respondError(transactionUid, 'handler does not exist on server');
     }
-    const content = this.handlers[topic](this, args);
-    this.respond(transactionUid, { status: 'success', content });
+    const req = new Request<TArg, TRet>(
+      args,
+      (content: TRet) => this.respondOk(transactionUid, content),
+      (reason: string) => this.respondError(transactionUid, reason),
+      this
+    );
+    this.handlers[topic](req);
   }
 
-  private respond<T>(transactionUid: string, response: SResponse<T>) {
-    this.sendMessage({ type: 'response', data: { transactionUid, response } });
+  private respondOk<T>(transactionUid: string, content: T) {
+    this.sendMessage({
+      type: 'response',
+      data: { transactionUid, response: { status: 'success', content } },
+    });
+  }
+
+  private respondError(transactionUid: string, reason: string) {
+    this.sendMessage({
+      type: 'response',
+      data: { transactionUid, response: { status: 'error', reason } },
+    });
   }
 
   private sendMessage<T>(message: SMessage<T>): void {

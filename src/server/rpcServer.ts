@@ -2,10 +2,11 @@ import { Server } from 'http';
 import ws from 'ws';
 import { v4 as uuid } from 'uuid';
 import { RpcSocket } from './rpcSocket';
+import { Request } from './request';
 
 export class RpcServer {
   private clients: IMap<RpcSocket> = {};
-  private handlers: IMap<(s: RpcSocket, args: any) => any> = {};
+  private handlers: IMap<(req: Request<any, any>) => any> = {};
   public onNewClient: Action<RpcSocket> | undefined;
 
   constructor(server: Server, path: string) {
@@ -23,7 +24,7 @@ export class RpcServer {
 
   public registerHandler<TArg, TRet>(
     topic: string,
-    handler: (s: RpcSocket, args: TArg) => TRet
+    handler: (req: Request<TArg, TRet>) => void
   ): void {
     this.handlers[topic] = handler;
   }
