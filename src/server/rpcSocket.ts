@@ -5,12 +5,18 @@ export class RpcSocket {
   private socket: ws;
   private handlers: IMap<(req: Request<any, any>, socket: RpcSocket) => void> = {};
 
+  /**@internal */
   constructor(socket: ws, handlers: IMap<(req: Request<any, any>, socket: RpcSocket) => void>) {
     this.socket = socket;
     this.handlers = handlers;
     socket.onmessage = (m) => this.handleMessage(JSON.parse(m.data.toString()));
   }
 
+  /**
+   * Send a json message to the client associated with this socket in topic.
+   * @param topic Topic to which the message will be posted.
+   * @param content Content of the message (json).
+   */
   public post<T>(topic: string, content: T): void {
     this.sendMessage({ type: 'topic', data: { topic, content } });
   }
