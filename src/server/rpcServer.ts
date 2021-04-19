@@ -6,7 +6,7 @@ import { Request } from './request';
 
 export class RpcServer {
   private clients: IMap<RpcSocket> = {};
-  private handlers: IMap<(req: Request<any, any>) => any> = {};
+  private handlers: IMap<(req: Request<any, any>, socket: RpcSocket) => any> = {};
   public onNewClient: Action<RpcSocket> | undefined;
 
   constructor(server: Server, path: string) {
@@ -24,7 +24,7 @@ export class RpcServer {
 
   public registerHandler<TArg, TRet>(
     topic: string,
-    handler: (req: Request<TArg, TRet>) => void
+    handler: (req: Request<TArg, TRet>, socket: RpcSocket) => void
   ): void {
     this.handlers[topic] = handler;
   }

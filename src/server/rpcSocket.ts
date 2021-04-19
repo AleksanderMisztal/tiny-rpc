@@ -3,9 +3,9 @@ import { Request } from './request';
 
 export class RpcSocket {
   private socket: ws;
-  private handlers: IMap<(req: Request<any, any>) => void> = {};
+  private handlers: IMap<(req: Request<any, any>, socket: RpcSocket) => void> = {};
 
-  constructor(socket: ws, handlers: IMap<(req: Request<any, any>) => void>) {
+  constructor(socket: ws, handlers: IMap<(req: Request<any, any>, socket: RpcSocket) => void>) {
     this.socket = socket;
     this.handlers = handlers;
     socket.onmessage = (m) => this.handleMessage(JSON.parse(m.data.toString()));
@@ -23,10 +23,9 @@ export class RpcSocket {
     const req = new Request<TArg, TRet>(
       args,
       (content: TRet) => this.respondOk(transactionUid, content),
-      (reason: string) => this.respondError(transactionUid, reason),
-      this
+      (reason: string) => this.respondError(transactionUid, reason)
     );
-    this.handlers[topic](req);
+    this.handlers[topic](req, this);
   }
 
   private respondOk<T>(transactionUid: string, content: T) {
